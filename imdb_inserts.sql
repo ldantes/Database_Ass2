@@ -10,7 +10,7 @@ INTO
     'Les',
     'Ducray',
     'M',
-    '9-AUG-90',
+    '9-AUG-1990',
     'xxxx',
     'Ireland',
     'First pets name',
@@ -30,7 +30,7 @@ INTO
     'Sam',
     'Harrison',
     'F',
-    '19-JUN-87',
+    '19-JUN-1987',
     'xxxx',
     'Ireland',
     'First pets name',
@@ -49,7 +49,7 @@ INTO
     'Richard',
     'King',
     'M',
-    '01-MAY-96',
+    '01-MAY-1996',
     'xxxx',
     'Ireland',
     'Mothers name',
@@ -118,6 +118,12 @@ INTO
   insert into title_genre values(2,'crime');
   insert into title_genre values(2,'thriller');
   
+  insert into user_rating values (1,1,8,sysdate);
+  insert into user_rating values (1,2,7,sysdate);
+  insert into user_rating values (2,2,9,sysdate);
+  insert into user_rating values (2,1,10,sysdate);
+  insert into user_rating values (3,2,6,sysdate);
+  
 
   commit;
  
@@ -134,7 +140,7 @@ INTO
     'matt',
     'Fan',
     'M',
-    '7-MAY-90',
+    '7-MAY-1990',
     'xxxx',
     'UK',
     'First pets name',
@@ -154,7 +160,7 @@ INTO
     'Mohammed',
     'Mohammed',
     'M',
-    '16-SEP-83',
+    '16-SEP-1983',
     'xxxx',
     'Saudi',
     '',
@@ -173,7 +179,7 @@ INTO
     'Jess',
     'Smith',
     'F',
-    '17-JAN-90',
+    '17-JAN-1990',
     'xxxx',
     'Ireland',
     'Mothers name',
@@ -246,6 +252,7 @@ INTO
   insert into characters2 values (char_seq2.nextval, 'Alison Hendrix', 'Clone');
   insert into characters2 values (char_seq2.nextval, 'Beth Childs', 'Clone');
   insert into characters2 values (char_seq2.nextval, 'Katja', 'Clone');
+  insert into characters2 values (char_seq2.nextval, 'Cicero', 'Cicero is the servant of General Maximus of the Roman army.');
   
   select * from characters2;
   
@@ -256,6 +263,7 @@ INTO
   insert into character_appearences2 values (5,3,3);
   insert into character_appearences2 values (6,3,3);
   insert into character_appearences2 values (7,3,3);
+  insert into character_appearences2 values (8,2,1);
   
   select * from character_appearences2;
   
@@ -270,6 +278,12 @@ INTO
   insert into title_genre2 values(2,'drama');
   insert into title_genre2 values(3,'drama');
   insert into title_genre2 values(3,'thriller');
+  
+  insert into user_rating2 values (1,1,8,sysdate);
+  insert into user_rating2 values (1,2,7,sysdate);
+  insert into user_rating2 values (2,2,9,sysdate);
+  insert into user_rating2 values (2,1,10,sysdate);
+  insert into user_rating2 values (3,2,6,sysdate);
   
 
   commit; 
