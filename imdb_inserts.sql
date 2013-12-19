@@ -85,6 +85,8 @@ INTO
   
   );
   
+
+  
   insert into celebrity values(celeb_seq.nextval,'Bobby Cannavale','3-MAY-1970',1.89,'Taurus','M');
   insert into celebrity values(celeb_seq.nextval,'Michael K. Williams','22-NOV-1966',1.8,'Sagittarius','m');
  
@@ -139,7 +141,7 @@ INTO
     'matttt90@imdb.com',
     'matt',
     'Fan',
-    'M',
+    1,
     '7-MAY-1990',
     'xxxx',
     'UK',
@@ -159,7 +161,7 @@ INTO
     'mo@imdb.com',
     'Mohammed',
     'Mohammed',
-    'M',
+    1,
     '16-SEP-1983',
     'xxxx',
     'Saudi',
@@ -178,7 +180,7 @@ INTO
     'jesssi@imdb.com',
     'Jess',
     'Smith',
-    'F',
+    0,
     '17-JAN-1990',
     'xxxx',
     'Ireland',
@@ -284,6 +286,7 @@ INTO
   insert into user_rating2 values (2,2,9,sysdate);
   insert into user_rating2 values (2,1,10,sysdate);
   insert into user_rating2 values (3,2,6,sysdate);
+  
   
 
   commit; 

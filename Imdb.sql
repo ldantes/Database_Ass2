@@ -244,7 +244,7 @@ CREATE TABLE Users2
   email_address varchar2(62) not null ,
   First_Name varchar2(32)not null,
   Surname varchar2(32) not null,
-  Gender char not null check (Gender in ('M','F','m','f')),
+  Gender integer check (Gender in (1,0)),
   Date_of_birth date not null ,
   ZIP varchar(5) not null,
   Country_of_Residence varchar2(50) not null  ,
