@@ -1,245 +1,387 @@
-DROP TABLE Title_Genre_staging;
-DROP TABLE Genre_staging;
-DROP TABLE Character_appearences_staging;
-DROP TABLE Character_staging;
-DROP TABLE User_Rating_staging;
-DROP TABLE Review_staging;
-DROP TABLE Users_staging;
-DROP TABLE Involvement_staging;
-DROP TABLE Title_staging;
-DROP TABLE Category_staging;
-DROP TABLE Celebrity_staging;
+-- Staging --
+DROP SEQUENCE stageuser_seq;
 
-drop  SEQUENCE STAGETITLE_SEQ;
-drop SEQUENCE STAGEChar_SEQ;
-drop SEQUENCE STAGECeleb_SEQ;
-drop SEQUENCE STAGEuser_SEQ;
-CREATE SEQUENCE STAGETITLE_SEQ MINVALUE 1 MAXVALUE
-  999999 INCREMENT BY 1 START WITH 1 CACHE 20 ;
-CREATE SEQUENCE STAGEChar_SEQ MINVALUE 1 MAXVALUE
-  999999 INCREMENT BY 1 START WITH 1 CACHE 20 ;
-CREATE SEQUENCE STAGECeleb_SEQ MINVALUE 1 MAXVALUE
-  999999 INCREMENT BY 1 START WITH 1 CACHE 20 ;
-CREATE SEQUENCE STAGEuser_SEQ MINVALUE 1 MAXVALUE
-  999999 INCREMENT BY 1 START WITH 1 CACHE 20 ;
+CREATE SEQUENCE stageuser_seq
+  MINVALUE 1
+  MAXVALUE 999999
+  INCREMENT BY 1
+  START WITH 1
+  CACHE 20;
 
+DROP TABLE stage_user;
 
-
-
-
-CREATE TABLE Celebrity_staging
-(
-  surrogateKey number PRIMARY KEY,
-  databaseSource integer,
-  Id number(10) ,
-  Name varchar(50) not null,
-  Date_of_Birth date not null,
-  Height  number(4,2),
-  star_sign varchar(15),
-  Gender varchar2(1)
-  
-);
-  drop index celeb_index_staging;
-    CREATE INDEX celeb_index_staging
-ON Celebrity_staging (name);
-
-insert into Celebrity_staging select STAGECeleb_SEQ.nextval, 1,c.* from celebrity c;
-insert into Celebrity_staging select STAGECeleb_SEQ.nextval, 2, c.Id, c.Name, c.Date_of_Birth ,c.Height * 3.28, c.star_sign, cast(to_char(c.gender) as varchar2(1)) from celebrity2 c;
-
-update Celebrity_staging set gender='F' where gender='0';
-update Celebrity_staging set gender='M' where gender='1';
-
-select * from Celebrity_staging;
-
-drop sequence Category_staging_SEQ;
-CREATE SEQUENCE Category_staging_SEQ MINVALUE 1 MAXVALUE
-  999999 INCREMENT BY 1 START WITH 1 CACHE 20 ;
-  
-CREATE TABLE Category_staging
-(
-   surrogateKey number PRIMARY KEY,
-   databaseSource integer,
-   Category varchar(20) 
-);
-insert into Category_staging select Category_staging_SEQ.nextval, 1,c.category from Category c;
-insert into Category_staging select Category_staging_SEQ.nextval, 2,c.category from Category2 c;
-
-
-CREATE TABLE Title_staging
-(
-  surrogateKey number PRIMARY KEY,
-  databaseSource integer,
-  Id number(10) ,
-  Name varchar(50) not null,
-  Rating decimal(3,1) check (rating <= 10.00),
-  Type varchar2(20) not null check (Type in ('TV Series','Tv Eisode','TV Mini-Series','Video', 'Short','Film','Tv Movie', 'Video Game' )),
-  Certificate varchar(5) ,
-  Duration number(3),
-  Introduction varchar2(200),
-  Storyline varchar2(500),
-  Release_Date date
-  
+CREATE TABLE stage_user
+  (
+     sk                   NUMBER PRIMARY KEY,
+     databasesource       INTEGER,
+     id                   NUMBER(10),
+     public_id            VARCHAR(24),
+     password             VARCHAR(64) NOT NULL,
+     date_joined          DATE NOT NULL,
+     email_address        VARCHAR2(62) NOT NULL,
+     first_name           VARCHAR2(32) NOT NULL,
+     surname              VARCHAR2(32) NOT NULL,
+     gender               CHAR NOT NULL,
+     date_of_birth        DATE NOT NULL,
+     zip                  VARCHAR(5) NOT NULL,
+     country_of_residence VARCHAR2(50) NOT NULL,
+     security_question    VARCHAR(32),
+     security_answer      VARCHAR(32)
   );
-  drop index Title_staging_index;
-    CREATE INDEX Title_staging_index
-ON Title_staging (name);
-  
- insert into Title_staging select STAGETITLE_SEQ.nextval, 1, id,name,rating,type,certificate,duration,introduction,storyline,release_date from Title;
- insert into Title_staging select STAGETITLE_SEQ.nextval, 2, id,name,rating,type,certificate,duration,introduction,storyline,release_date from Title2;
 
---drop SEQUENCE Involvement_staging_SEQ;
---CREATE SEQUENCE Involvement_staging_SEQ MINVALUE 1 MAXVALUE
---  999999 INCREMENT BY 1 START WITH 1 CACHE 20 ; 
---CREATE TABLE Involvement_staging
---(
---  surrogateKey number PRIMARY KEY,
---  databaseSource integer,
---  Celebrity_staging_Id number(10) ,
---  Title_staging_Id number(10),
---  Category integer,
--- CONSTRAINT Inv_Celeb_stageId FOREIGN KEY (Celebrity_staging_Id)
---        REFERENCES Celebrity_staging(surrogateKey),
---  CONSTRAINT Inv_Title_staging_Id FOREIGN KEY (Title_staging_Id)
---        REFERENCES Title_staging(surrogateKey),
---  CONSTRAINT Inv_Category_staging FOREIGN KEY (Category)
---        REFERENCES Category_staging(surrogateKey)
---);
---
---insert into Involvement_staging select Involvement_staging_SEQ.nextval,1, i.* from involvement i;
+INSERT INTO stage_user
+SELECT stageuser_seq.NEXTVAL,
+       1,
+       u.id,
+       u.public_id,
+       u.password,
+       u.date_joined,
+       u.email_address,
+       u.first_name,
+       u.surname,
+       u.gender,
+       u.date_of_birth,
+       u.zip,
+       u.country_of_residence,
+       u.security_question,
+       u.security_answer
+FROM   users u
+WHERE  u.id NOT IN (SELECT id
+                    FROM   stage_user
+                    WHERE  databasesource = 1);
+
+INSERT INTO stage_user
+SELECT stageuser_seq.NEXTVAL,
+       2,
+       u.id,
+       u.public_id,
+       u.password,
+       u.date_joined,
+       u.email_address,
+       u.first_name,
+       u.surname,
+       Cast(To_char(u.gender) AS CHAR(1)),
+       u.date_of_birth,
+       u.zip,
+       u.country_of_residence,
+       u.security_question,
+       u.security_answer
+FROM   users2 u
+WHERE  u.id NOT IN (SELECT id
+                    FROM   stage_user
+                    WHERE  databasesource = 2);
+
+SELECT *
+FROM   stage_user;
+
+UPDATE stage_user
+SET    gender = 'F'
+WHERE  gender = '0';
+
+UPDATE stage_user
+SET    gender = 'M'
+WHERE  gender = '1';
+
+UPDATE stage_user
+SET    gender = 'F'
+WHERE  gender = 'f';
+
+UPDATE stage_user
+SET    gender = 'M'
+WHERE  gender = 'm';
+
+DROP SEQUENCE stagetitle_seq;
+
+CREATE SEQUENCE stagetitle_seq
+  MINVALUE 1
+  MAXVALUE 999999
+  INCREMENT BY 1
+  START WITH 1
+  CACHE 20;
+
+DROP TABLE stage_title;
+
+CREATE TABLE stage_title
+  (
+     sk             NUMBER PRIMARY KEY,
+     databasesource INTEGER,
+     title_id       NUMBER(10),
+     title_name     VARCHAR(50),
+     rating         NUMBER(4),
+     TYPE           VARCHAR2(20),
+     certificate    VARCHAR(5),
+     duration       NUMBER(3),
+     introduction   VARCHAR2(200),
+     storyline      VARCHAR2(500),
+     release_date   DATE
+  );
+
+INSERT INTO stage_title
+SELECT stagetitle_seq.NEXTVAL,
+       1,
+       t.id,
+       t.name,
+       t.rating,
+       t.TYPE,
+       t.certificate,
+       t.duration,
+       t.introduction,
+       t.storyline,
+       t.release_date
+FROM   title t
+WHERE  t.id NOT IN (SELECT title_id
+                    FROM   stage_title
+                    WHERE  databasesource = 1);
+
+INSERT INTO stage_title
+SELECT stagetitle_seq.NEXTVAL,
+       2,
+       t.id,
+       t.name,
+       t.rating / 10,
+       t.TYPE,
+       t.certificate,
+       t.duration,
+       t.introduction,
+       t.storyline,
+       t.release_date
+FROM   title2 t
+WHERE  t.id NOT IN (SELECT title_id
+                    FROM   stage_title
+                    WHERE  databasesource = 2);
+
+DROP TABLE celebrity_staging;
+
+CREATE TABLE celebrity_staging
+  (
+     surrogatekey   NUMBER PRIMARY KEY,
+     databasesource INTEGER,
+     id             NUMBER(10),
+     name           VARCHAR(50) NOT NULL,
+     date_of_birth  DATE NOT NULL,
+     height         NUMBER(4, 2),
+     star_sign      VARCHAR(15),
+     gender         VARCHAR2(1)
+  );
+
+DROP SEQUENCE stage_user_rating_seq;
+
+CREATE SEQUENCE stage_user_rating_seq
+  MINVALUE 1
+  MAXVALUE 999999
+  INCREMENT BY 1
+  START WITH 1
+  CACHE 20;
+
+DROP TABLE stage_user_rating;
+
+CREATE TABLE stage_user_rating
+  (
+     sk         INTEGER PRIMARY KEY,
+     dbsource   INTEGER,
+     user_id    NUMBER(10),
+     title_id   NUMBER(10),
+     score      NUMBER(2) CHECK (score <= 10),
+     date_added DATE
+  );
+
+INSERT INTO stage_user_rating
+SELECT stage_user_rating_seq.NEXTVAL,
+       1,
+       u.*
+FROM   user_rating u;
+
+INSERT INTO stage_user_rating
+SELECT stage_user_rating_seq.NEXTVAL,
+       2,
+       u.user_id,
+       u.title_id,
+       u.score / 10,
+       u.date_added
+FROM   user_rating2 u;
+
+DROP SEQUENCE country_seq;
+
+CREATE SEQUENCE country_seq
+  MINVALUE 1
+  MAXVALUE 999999
+  INCREMENT BY 1
+  START WITH 1
+  CACHE 20;
+
+DROP TABLE country_stage;
+
+CREATE TABLE country_stage
+  (
+     country_sk   NUMBER PRIMARY KEY,
+     sourcedb     INTEGER,
+     country_name VARCHAR2(50)
+  );
+
+INSERT INTO country_stage
+SELECT country_seq.NEXTVAL,
+       1,
+       country_of_residence
+FROM   (SELECT DISTINCT country_of_residence
+        FROM   users);
+
+INSERT INTO country_stage
+SELECT country_seq.NEXTVAL,
+       2,
+       country_of_residence
+FROM   (SELECT DISTINCT country_of_residence
+        FROM   users2
+        WHERE  country_of_residence NOT IN (SELECT country_name
+                                            FROM   country_stage));
+
+SELECT *
+FROM   country_stage;
+
+DROP SEQUENCE age_seq;
+
+CREATE SEQUENCE age_seq
+  MINVALUE 1
+  MAXVALUE 999999
+  INCREMENT BY 1
+  START WITH 1
+  CACHE 20;
+
+DROP TABLE age_stage;
+
+CREATE TABLE age_stage
+  (
+     age_sk NUMBER PRIMARY KEY,
+     age    NUMBER(3)
+  );
+
+SELECT *
+FROM   age_stage;
+
+INSERT INTO age_stage
+SELECT age_seq.NEXTVAL,
+       age
+FROM   (SELECT DISTINCT Trunc(( To_number(To_char(r.date_added, 'yyyymmdd'))
+                                       - To_number(
+                                       To_char(u.date_of_birth, 'yyyymmdd')) ) /
+                                                      10000) AS age
+        FROM   stage_user u,
+               stage_user_rating r
+        WHERE  u.id = r.user_id
+               AND u.databasesource = r.dbsource);
+
+DROP SEQUENCE date_added_seq;
+
+CREATE SEQUENCE date_added_seq
+  MINVALUE 1
+  MAXVALUE 999999
+  INCREMENT BY 1
+  START WITH 1
+  CACHE 20;
+
+DROP TABLE stage_date_added;
+
+CREATE TABLE stage_date_added
+  (
+     date_added_sk NUMBER PRIMARY KEY,
+     monthyear     VARCHAR(6)
+  );
+
+INSERT INTO stage_date_added
+SELECT date_added_seq.NEXTVAL,
+       ( To_char(date_added, 'mmyyyy') )
+FROM   (SELECT DISTINCT r.date_added
+        FROM   stage_user_rating r);
+
+SELECT *
+FROM   stage_date_added;
+
+DROP TABLE fact_stage;
+
+CREATE TABLE fact_stage
+  (
+     user_sk       INTEGER,
+     title_sk      INTEGER,
+     age_sk        INTEGER,
+     country_sk    INTEGER,
+     date_added_sk VARCHAR2(6),
+     user_id       INTEGER,
+     age           INTEGER,
+     country       VARCHAR(30),
+     date_added    DATE,
+     title_id      INTEGER,
+     score         NUMBER(4, 2),
+     sourcedb      INTEGER
+  );
+
+INSERT INTO fact_stage
+            (user_id,
+             title_id,
+             score,
+             date_added,
+             sourcedb)
+SELECT user_id,
+       title_id,
+       score,
+       date_added,
+       dbsource
+FROM   stage_user_rating;
+
+UPDATE fact_stage
+SET    user_sk = (SELECT stage_user.sk
+                  FROM   stage_user
+                  WHERE  ( stage_user.id = fact_stage.user_id
+                           AND stage_user.databasesource = fact_stage.sourcedb )
+                 );
+
+UPDATE fact_stage
+SET    title_sk = (SELECT stage_title.sk
+                   FROM   stage_title
+                   WHERE  ( stage_title.title_id = fact_stage.title_id
+                            AND stage_title.databasesource = fact_stage.sourcedb
+                          ));
+
+UPDATE fact_stage f
+SET    age = (SELECT Trunc(( To_number(To_char(f.date_added, 'yyyymmdd'))
+                             - To_number(
+                                    To_char(u.date_of_birth, 'yyyymmdd'))
+                                        ) /
+                                                10000)
+              FROM   stage_user u
+              WHERE  ( u.id = f.user_id
+                       AND u.databasesource = f.sourcedb ));
+
+UPDATE fact_stage
+SET    age_sk = (SELECT age_sk
+                 FROM   age_stage
+                 WHERE  age_stage.age = fact_stage.age);
+
+UPDATE fact_stage
+SET    country = (SELECT country_of_residence
+                  FROM   stage_user
+                  WHERE  fact_stage.user_sk = stage_user.sk);
+
+UPDATE fact_stage
+SET    country_sk = (SELECT country_sk
+                     FROM   country_stage
+                     WHERE  fact_stage.country = country_stage.country_name);
+
+UPDATE fact_stage
+SET    date_added_sk = (SELECT DISTINCT date_added_sk
+                        FROM   stage_date_added
+                        WHERE  stage_date_added.monthyear =
+                               ( To_char(fact_stage.date_added, 'mmyyyy') ));
+
+SELECT *
+FROM   fact_stage;
+
+SELECT *
+FROM   age_stage;
+
+SELECT *
+FROM   stage_user;
+
+SELECT *
+FROM   stage_title; 
 
 
-CREATE TABLE Users_staging
-(
-  surrogateKey number PRIMARY KEY,
-  databaseSource integer,
-  id number(10),
-  public_id varchar(24) unique,
-  Password varchar(64) not null,
-  Date_Joined date not null,
-  email_address varchar2(62) not null ,
-  First_Name varchar2(32)not null,
-  Surname varchar2(32) not null,
-  Gender char not null check (Gender in ('M','F','m','f')),
-  Date_of_birth date not null ,
-  ZIP varchar(5) not null,
-  Country_of_Residence varchar2(50) not null  ,
-  Security_Question varchar(32),
-  Security_Answer varchar(32)
-  
-);
-
-insert into Users_staging select STAGEuser_SEQ.nextval,1, u.* from users u;
-insert into Users_staging select STAGEuser_SEQ.nextval,2, u.* from users2 u;
-
-select * from Users_staging;
-
---CREATE TABLE Review_staging
---(
---  surrogateKey number PRIMARY KEY,
---  databaseSource integer,
---  User_Id number(10),
---  Title_staging_Id number(10),
---  Score number(1),
---  Review_staging varchar(500),
---  
---   CONSTRAINT Rev_User_stageId FOREIGN KEY (User_Id)
---        REFERENCES Users_staging(surrogateKey),
---   CONSTRAINT Rev_Title_staging_Id FOREIGN KEY (Title_staging_Id)
---        REFERENCES Title_staging(surrogateKey)
---);
---drop index Rev_Title_staging_index;
---    CREATE INDEX Rev_Title_staging_index
---ON Review_staging (Title_staging_Id);
---
---drop index Rev_user_index;
---    CREATE INDEX Rev_user_stageindex
---ON Review_staging (User_Id);
-
---CREATE TABLE User_Rating_staging
---(
---  surrogateKey number PRIMARY KEY,
---  databaseSource integer,
---  User_Id number(10),
---  Title_staging_Id number(10),
---  Score number(2) check (Score <= 10),
---  date_added date,
--- 
---   CONSTRAINT UR_User_stageId FOREIGN KEY (User_Id)
---        REFERENCES Users_staging(surrogateKey),
---   CONSTRAINT UR_Title_staging_Id FOREIGN KEY (Title_staging_Id)
---        REFERENCES Title_staging(surrogateKey)
---);
-
-CREATE TABLE Character_staging
-(
-  surrogateKey number PRIMARY KEY,
-  databaseSource integer,
-  Id number(10),
-  Character_Name varchar(50)  NOT NULL,
-  Biography varchar(200)
- 
-);
-drop index char_stageindex;
-    CREATE INDEX char_stageindex
-ON Character_staging (Character_Name);
-
-insert into Character_staging select STAGEChar_SEQ.nextval, 1, c.* from characters c;
-insert into Character_staging select STAGEChar_SEQ.nextval, 2, c.* from characters2 c;
-
-select * from Character_staging;
-
---CREATE TABLE Character_appearences_staging
---(
---  surrogateKey number PRIMARY KEY,
---  databaseSource integer,
---  Character_id  number(10),
---  Title_staging_Id number(10),
---  Celebrity_staging_Id number(10),
--- 
---  
---   CONSTRAINT Appear_Char_stageId FOREIGN KEY (Character_Id)
---        REFERENCES Character_staging(surrogateKey),
---   CONSTRAINT Appear_Celeb_stageId FOREIGN KEY (Celebrity_staging_Id)
---        REFERENCES Celebrity_staging(surrogateKey),
---   CONSTRAINT appear_Title_staging_Id FOREIGN KEY (Title_staging_Id)
---        REFERENCES Title_staging(surrogateKey)
---  
---);
-
-drop index CA_Title_staging_index;
-    CREATE INDEX CA_Title_staging_index
-ON Character_appearences_staging (Title_staging_Id);
-
-drop index CA_celeb_stageindex;
-    CREATE INDEX CA_celeb_stageindex
-ON Character_appearences_staging (Celebrity_staging_Id);
-
-drop index CA_char_stageindex;
-    CREATE INDEX CA_char_stageindex
-ON Character_appearences_staging (Character_id);
-
-CREATE TABLE Genre_staging
-(
---  surrogateKey number PRIMARY KEY,
---  databaseSource integer,
-  Genre varchar(20)
-  
-);
-insert into Genre_staging select genre from genre;
-insert into Genre_staging select genre from genre2;
-
-select * from genre_staging;
-
---CREATE TABLE Title_Genre_staging
---(
---  surrogateKey number PRIMARY KEY,
---  databaseSource integer,
---  Title_staging_Id number(10),
---  Genre_staging integer,
--- 
---   CONSTRAINT Title_Genre_staging FOREIGN KEY (Genre_staging)
---        REFERENCES Genre_staging(surrogateKey),
---   CONSTRAINT Genre_Title_staging FOREIGN KEY (Title_staging_Id)
---        REFERENCES Title_staging(surrogateKey)
---  
---);
+commit;
